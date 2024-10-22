@@ -1,0 +1,24 @@
+# Install pre-commit on your OS.
+# Use "pre-commit install" to install hooks, and they will run pre-commit to git
+# Use "pre-commit run --all" to run all hooks.
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.3.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: detect-private-key
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.77.0
+    hooks:
+      - id: terraform_fmt # Linter for Terraform/openTofu Code.
+        args: ["args=-recursive"]
+      - id: terraform_docs # Automatic docs of the project.
+        args:
+          - args=-recursive
+          - --hook-config=--path-to-file=../README.md
+          - --hook-config=--add-to-existing-file=true
+          - --hook-config=--create-file-if-not-exist=true
+      # - id: terraform_tflint # Tool for Code quality and potential problems/security risks. Very restrictive.
+      #   args: ["--args=--config=__GIT_WORKING_DIR__/.tflint.hcl"]
