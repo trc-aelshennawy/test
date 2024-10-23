@@ -34,7 +34,7 @@ data "aws_iam_policy_document" "github_allow" {
       values   = ["repo:${local.github_organisation}/${local.github_repo}:*"] #TODO: Eine Rolle für alle Repos? Oder Repo einzeln? (${github_repo}:*) oder Zugriff anders beschränken?
     }
     condition {
-      test     = "StringEqual"
+      test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:aud"
       values   = ["sts.amazonaws.com"]
     }
@@ -42,4 +42,10 @@ data "aws_iam_policy_document" "github_allow" {
     # e.g. Filtering on sub key: for pull_request events (repo:ORG-NAME/REPO-NAME:pull_request), specific branches (repo:ORG-NAME/REPO-NAME:ref:refs/heads/BRANCH-NAME),
     # tags (repo:ORG-NAME/REPO-NAME::ref:refs/tags/TAG-NAME)
   }
+}
+
+# Add PowerUserAccess to the github_actions role #TODO: Define and set permissions -> e.g. assume other roles
+resource "aws_iam_role_policy_attachment" "github_actions" {
+  role       = aws_iam_role.github_actions.name
+  policy_arn = "arn:aws:iam::aws:policy/PowerUserAccess"
 }
