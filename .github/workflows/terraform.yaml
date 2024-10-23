@@ -16,8 +16,8 @@ defaults:
     shell: bash
     working-directory: aws_envs #TODO: Add logic to account for different naming (aws-envs and aws_envs)
 jobs:
-    terraform: 
-        name: 'Terraform' 
+    terraform:
+        name: 'Terraform'
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
@@ -27,13 +27,13 @@ jobs:
               with:
                 audience: sts.amazonaws.com
                 aws-region: eu-central-1 #TODO: Always eu-central? Put in secrets?
-                role-to-assume: arn:aws:iam::ssss:role/github_actions_role #TODO: Dynamic Account ID? -> Secrets arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github_actions_role 
+                role-to-assume: arn:aws:iam::ssss:role/github_actions_role #TODO: Dynamic Account ID? -> Secrets arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github_actions_role
             - name: Terraform init
               run: terraform init
             - name: Terraform validate
               run: terraform validate
             - name: Terraform plan
-              run: terraform plan 
+              run: terraform plan
             - uses: actions/github-script@v7 # Comment on Pull Request
               if: github.event_name == 'pull_request'
               env:
@@ -73,8 +73,8 @@ jobs:
             - name: Terraform apply
               run: terraform apply --auto-approve
               when: manual
-            
 
-    
+
+
     # apply:
     # destroy:

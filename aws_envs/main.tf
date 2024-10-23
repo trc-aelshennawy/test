@@ -31,7 +31,7 @@ data "aws_iam_policy_document" "github_allow" {
     condition {
       test     = "StringLike"                                                 # Ändern falls einzelner Zugriff auf Repos und Wildcard Operator wirdn icht genutzt -> StringEquals
       variable = "token.actions.githubusercontent.com:sub"                    # GitHub OIDC Provider Subject -> Defines the repositories allowed to use this role
-      values   = ["repo:${local.github_organisation}/${local.github_repo}:*"] #TODO: Eine Rolle für alle Repos? Oder Repo einzeln? (${github_repo}:*) oder Zugriff anders beschränken? 
+      values   = ["repo:${local.github_organisation}/${local.github_repo}:*"] #TODO: Eine Rolle für alle Repos? Oder Repo einzeln? (${github_repo}:*) oder Zugriff anders beschränken?
     }
     condition {
       test     = "StringEqual"

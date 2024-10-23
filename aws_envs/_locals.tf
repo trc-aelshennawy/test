@@ -16,5 +16,5 @@ locals {
   # Pipeline locals  #TODO: Change after testing.
   github_organisation = "trc-aelshennawy"
   github_repo         = "test"
-  
+
 }
