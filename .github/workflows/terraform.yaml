@@ -6,7 +6,7 @@ permissions:
 on:
   push:
     branches: [ "main" ]
-    paths: ["aws-envs/**","aws_envs/**"]
+    paths: ["aws-envs/**","aws_envs/**",".github/workflows"]
   pull_request:
     branches: [ "main" ]
     paths: ["aws-envs/**","aws_envs/**"]
@@ -25,7 +25,7 @@ jobs:
             - name: configure AWS credentials
               uses: aws-actions/configure-aws-credentials@v4
               with:
-                audience: sts.amazonaws.com
+                audience: 'sts.amazonaws.com'
                 aws-region: eu-central-1 #TODO: Always eu-central? Put in secrets?
                 role-to-assume: arn:aws:iam::ssss:role/github_actions_role #TODO: Dynamic Account ID? -> Secrets arn:aws:iam::XX$XXX{{ secrets.AWS_ACCOUNT_ID }}:role/github_actions_role
             - name: Terraform init
