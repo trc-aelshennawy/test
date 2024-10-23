@@ -6,7 +6,7 @@ permissions:
 on:
   push:
     branches: [ "main" ]
-    paths: ["aws-envs/**","aws_envs/**",".github/workflows"]
+    paths: ["aws-envs/**","aws_envs/**",".github/workflows/**"]
   pull_request:
     branches: [ "main" ]
     paths: ["aws-envs/**","aws_envs/**"]
