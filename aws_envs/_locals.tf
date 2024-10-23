@@ -12,4 +12,9 @@ locals {
     # "creator"     = "" # Enter creator of repository
     # "Environment" = "" # Enter Environment (e.g. dev, staging, prod)
   }
+
+  # Pipeline locals  #TODO: Change after testing.
+  github_organisation = "trc-aelshennawy"
+  github_repo         = "test"
+  
 }
