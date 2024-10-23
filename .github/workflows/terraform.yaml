@@ -27,7 +27,7 @@ jobs:
               with:
                 audience: sts.amazonaws.com
                 aws-region: eu-central-1 #TODO: Always eu-central? Put in secrets?
-                role-to-assume: arn:aws:iam::ssss:role/github_actions_role #TODO: Dynamic Account ID? -> Secrets arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github_actions_role
+                role-to-assume: arn:aws:iam::ssss:role/github_actions_role #TODO: Dynamic Account ID? -> Secrets arn:aws:iam::XX$XXX{{ secrets.AWS_ACCOUNT_ID }}:role/github_actions_role
             - name: Terraform init
               run: terraform init
             - name: Terraform validate
@@ -70,9 +70,17 @@ jobs:
                     repo: context.repo.repo,
                     body: output
                   })
+            - uses: trstringer/manual-approval@v1
+              with:
+                secret: ${{ github.TOKEN }}
+                approvers: laysauchoa
+                minimum-approvals: 1
+                issue-title: "Deploying v1.0.0 to prod"
+                issue-body: "Review the terraform plan, then approve or deny the deployment of v1.0.0 to prod."
+                exclude-workflow-initiator-as-approver: false
             - name: Terraform apply
               run: terraform apply --auto-approve
-              when: manual
+
 
 
 
