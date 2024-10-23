@@ -1,4 +1,4 @@
-name: 'Terraform'
+name: 'Terraform Plan'
 permissions:
   id-token: write # Required to fetch the JWT OIDC Token
   contents: read # Actions/checkout
@@ -6,7 +6,7 @@ permissions:
 on:
   push:
     branches: [ "main" ]
-    paths: ["aws-envs/**","aws_envs/**",".github/workflows/**"]
+    paths: ["aws-envs/**","aws_envs/**",".github/workflows/**"] # TODO: Remove after testing.
   pull_request:
     branches: [ "main" ]
     paths: ["aws-envs/**","aws_envs/**"]
@@ -74,8 +74,9 @@ jobs:
               with:
                 secret: ${{ github.TOKEN }}
                 minimum-approvals: 1
-                issue-title: "Deploying v1.0.0 to prod"
-                issue-body: "Review the terraform plan, then approve or deny the deployment of v1.0.0 to prod."
+                approvers: trc-aelshennawy #TODO Change to github galeria org group, or automatic apply -> not manual approval without enterprise github; maybe multiple workflows for plan,apply,destroy with workflow_dispatch for manual approval
+                issue-title: "Manual Approval: Terraform Deployment"
+                issue-body: "Review the terraform plan, then approve or deny the deployment."
                 exclude-workflow-initiator-as-approver: false
             - name: Terraform apply
               run: terraform apply --auto-approve
