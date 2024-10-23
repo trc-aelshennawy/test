@@ -2,9 +2,9 @@
 provider "aws" {
   region = local.region
 
-  assume_role {
-    role_arn = "arn:aws:iam::<123456789876>:role/admin" #Enter Role if used else the role of the pipeline/user will get used for deployments.
-  }
+  # assume_role {
+  #   role_arn = "arn:aws:iam::<123456789876>:role/admin" #Enter Role if used else the role of the pipeline/user will get used for deployments.
+  # }
 }
 
 # Alias Provider can be used for deploying to different region, e.g us-east-1.
