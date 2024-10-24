@@ -3,6 +3,7 @@ permissions:
   id-token: write # Required to fetch the JWT OIDC Token
   contents: read # Actions/checkout
   issues: write
+  pull-requests: write
 # Run Deployment Pipeline manually after analysing result of the planning workflow/pipeline (terraform_plan.yaml).
 on:
   # push:
