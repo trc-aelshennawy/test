@@ -40,8 +40,8 @@ jobs:
               uses: aws-actions/configure-aws-credentials@v4
               with:
                 audience: 'sts.amazonaws.com'
-                aws-region: us-west-2 #TODO: Always eu-central? Put in secrets?
-                role-to-assume: arn:aws:iam::870615114862:role/github_actions_role #TODO: Dynamic Account ID? -> Secrets arn:aws:iam::XX$XXX{{ secrets.AWS_ACCOUNT_ID }}:role/github_actions_role
+                aws-region: eu-central-1
+                role-to-assume: arn:aws:iam::628471438687:role/github_actions_role
             - name: init
               id: init
               run: terraform init
@@ -54,6 +54,11 @@ jobs:
               id: fmt
               run: terraform fmt -check -no-color
               working-directory: ${{ env.WORKING_DIR }}
+            - name: tfsec
+              id: tfsec
+              uses: aquasecurity/tfsec-action@v1.0.3
+              with:
+                soft_fail: true # if true action can't break the build
             - name: plan
               id: plan
               run: terraform plan -no-color
@@ -67,7 +72,19 @@ jobs:
                 script: |
                   const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
                   #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+                  #### Terraform Tfsec ⚙️\`${{ steps.tfsec.outcome }}\`
+
+
+                  <details><summary>Show Tfsec</summary>
+
+                  \`\`\`\n
+                  ${{ steps.tfsec.outputs.stdout }}
+                  \`\`\`
+
+                  </details>
+
                   #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+
                   <details><summary>Validation Output</summary>
 
                   \`\`\`\n
