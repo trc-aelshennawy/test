@@ -32,6 +32,7 @@ jobs:
                 else
                   echo "Error: Directories 'aws-envs's & 'aws_envs' don't exist."
                   exit 1
+                fi
             - uses: actions/checkout@v4
             - uses: hashicorp/setup-terraform@v3
             - name: configure AWS credentials
