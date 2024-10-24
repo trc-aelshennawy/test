@@ -25,13 +25,13 @@ jobs:
             - name: 'Set working directory'
               id: set_working_dir
               run: |
-                if [ -d aws-envs]; then
+                if [ -d "aws-envs" ]; then
                   echo "WORKING_DIR=aws-envs" >> $GITHUB_ENV
-                elif [ -d aws_envs]; then
+                elif [ -d "aws_envs" ]; then
                   echo "WORKING_DIR=aws_envs" >> $GITHUB_ENV
                 else
                   echo "Error: Directories 'aws-envs's & 'aws_envs' don't exist."
-                exit 1
+                  exit 1
             - uses: actions/checkout@v4
             - uses: hashicorp/setup-terraform@v3
             - name: configure AWS credentials
