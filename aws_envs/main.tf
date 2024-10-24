@@ -45,7 +45,12 @@ data "aws_iam_policy_document" "github_allow" {
 }
 
 # Add PowerUserAccess to the github_actions role #TODO: Define and set permissions -> e.g. assume other roles
-resource "aws_iam_role_policy_attachment" "github_actions" {
+resource "aws_iam_role_policy_attachment" "power_user_access" {
   role       = aws_iam_role.github_actions.name
   policy_arn = "arn:aws:iam::aws:policy/PowerUserAccess"
+}
+# Add IAM:ReadOnly access to the github_actions role - required and not included in PowerUser Policy.
+resource "aws_iam_role_policy_attachment" "iam_read_only" {
+  role       = aws_iam_role.github_actions.name
+  policy_arn = "arn:aws:iam::aws:policy/IAMReadOnlyAccess"
 }
