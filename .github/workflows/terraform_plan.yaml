@@ -7,20 +7,31 @@ permissions:
 on:
   push:
     branches: [ "main" ]
-    paths: ["aws-envs/**","aws_envs/**",".github/workflows/**"] # TODO: Remove after testing.
+    paths: ["aws-envs/**","aws_envs/**",".github/workflows/**"] # TODO: Remove after testing.Remove if all repoitorie use the same name.
   pull_request:
     branches: [ "main" ]
     paths: ["aws-envs/**","aws_envs/**"]
   workflow_dispatch:
+
 defaults:
   run:
     shell: bash
-    working-directory: aws_envs #TODO: Add logic to account for different naming (aws-envs and aws_envs)
 jobs:
     terraform:
-        name: 'Terraform'
-        runs-on: ubuntu-latest
-        steps:
+          name: 'Terraform Plan'
+          runs-on: ubuntu-latest
+          steps:
+            - uses: actions/checkout@v4
+            - name: 'Set working directory'
+              id: set_working_dir
+              run: |
+                if [ -d aws-envs]; then
+                  echo "WORKING_DIR=aws-envs" >> $GITHUB_ENV
+                elif [ -d aws_envs]; then
+                  echo "WORKING_DIR=aws_envs" >> $GITHUB_ENV
+                else
+                  echo "Error: Directories 'aws-envs's & 'aws_envs' don't exist."
+                exit 1
             - uses: actions/checkout@v4
             - uses: hashicorp/setup-terraform@v3
             - name: configure AWS credentials
@@ -29,16 +40,22 @@ jobs:
                 audience: 'sts.amazonaws.com'
                 aws-region: eu-central-1 #TODO: Always eu-central? Put in secrets?
                 role-to-assume: arn:aws:iam::870615114862:role/github_actions_role #TODO: Dynamic Account ID? -> Secrets arn:aws:iam::XX$XXX{{ secrets.AWS_ACCOUNT_ID }}:role/github_actions_role
-            - name: Terraform init
+            - name: init
               run: terraform init
-            - name: Terraform validate
+              working-directory: ${{ env.WORKING_DIR }}
+            - name: validate
               run: terraform validate
-            - name: Terraform plan
+              working-directory: ${{ env.WORKING_DIR }}
+            - name: fmt
+              run: terraform fmt -check
+              working-directory: ${{ env.WORKING_DIR }}
+            - name: Plan
               run: terraform plan
+              working-directory: ${{ env.WORKING_DIR }}
             - uses: actions/github-script@v7 # Comment on Pull Request
               if: github.event_name == 'pull_request'
               env:
-                PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+                PLAN: "terraform\n${{ steps.Plan.outputs.stdout }}"
               with:
                 github-token: ${{ secrets.GITHUB_TOKEN }}
                 script: |
@@ -71,16 +88,7 @@ jobs:
                     repo: context.repo.repo,
                     body: output
                   })
-            - uses: trstringer/manual-approval@v1
-              with:
-                secret: ${{ github.TOKEN }}
-                minimum-approvals: 1
-                approvers: trc-aelshennawy #TODO Change to github galeria org group, or automatic apply -> not manual approval without enterprise github; maybe multiple workflows for plan,apply,destroy with workflow_dispatch for manual approval
-                issue-title: "Manual Approval: Terraform Deployment"
-                issue-body: "Review the terraform plan, then approve or deny the deployment."
-                exclude-workflow-initiator-as-approver: false
-            - name: Terraform apply
-              run: terraform apply --auto-approve
+
 
 
 
