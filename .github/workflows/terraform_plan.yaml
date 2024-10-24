@@ -41,7 +41,7 @@ jobs:
               with:
                 audience: 'sts.amazonaws.com'
                 aws-region: eu-central-1
-                role-to-assume: arn:aws:iam::628471438687:role/github_actions_role
+                role-to-assume: arn:aws:iam::870615114862:role/github_actions_role # 628471438687 galeria gkk aws users
             - name: init
               id: init
               run: terraform init
