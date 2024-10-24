@@ -3,6 +3,7 @@ permissions:
   id-token: write # Required to fetch the JWT OIDC Token
   contents: read # Actions/checkout
   issues: write
+  #pull-requests: write
 # Run Pipeline on push or merge requests on the main branch if environment in aws-envs was changed. Alternatively run manually in GitHub.
 on:
   push:
@@ -53,7 +54,7 @@ jobs:
             - name: Plan
               run: terraform plan
               working-directory: ${{ env.WORKING_DIR }}
-            - uses: actions/github-script@v7 # Comment on Pull Request
+            - uses: actions/github-script@v7 # Comment on Pull Request uses Setting in GitHub Workflow Premissions -> "Allow GitHub Actions to create and approve pull requests"
               if: github.event_name == 'pull_request'
               env:
                 PLAN: "terraform\n${{ steps.Plan.outputs.stdout }}"
