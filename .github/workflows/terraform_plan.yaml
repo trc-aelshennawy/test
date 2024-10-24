@@ -3,7 +3,9 @@ permissions:
   id-token: write # Required to fetch the JWT OIDC Token
   contents: read # Actions/checkout
   issues: write
-  #pull-requests: write
+
+  pull-requests: write
+
 # Run Pipeline on push or merge requests on the main branch if environment in aws-envs was changed. Alternatively run manually in GitHub.
 on:
   push:
