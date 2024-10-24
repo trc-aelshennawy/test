@@ -48,15 +48,15 @@ jobs:
               working-directory: ${{ env.WORKING_DIR }}
             - name: validate
               id: validate
-              run: terraform validate
+              run: terraform validate -no-color
               working-directory: ${{ env.WORKING_DIR }}
             - name: fmt
               id: fmt
-              run: terraform fmt -check
+              run: terraform fmt -check -no-color
               working-directory: ${{ env.WORKING_DIR }}
             - name: plan
               id: plan
-              run: terraform plan
+              run: terraform plan -no-color
               working-directory: ${{ env.WORKING_DIR }}
             - uses: actions/github-script@v7 # Comment on Pull Request
               if: github.event_name == 'pull_request'
