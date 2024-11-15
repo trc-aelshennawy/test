@@ -4,13 +4,13 @@ permissions:
   contents: read # Actions/checkout
   issues: write
   pull-requests: write
-# Run Destruction Pipeline only manually.
+# Run Deployment Pipeline manually after analysing result of the planning workflow/pipeline (terraform_plan.yaml).
 on:
   workflow_dispatch:
 
 jobs:
-  terraform_apply:
-    name: 'Terraform Apply'
+  terraform_destroy:
+    name: 'Terraform Destroy'
     runs-on: ubuntu-latest
 
     defaults:
@@ -27,7 +27,7 @@ jobs:
           elif [ -d "aws_envs" ]; then
             echo "WORKING_DIR=aws_envs" >> $GITHUB_ENV
           else
-            echo "Error: Directories 'aws-envs's || 'aws_envs' don't exist."
+            echo "Error: Directories 'aws-envs's & 'aws_envs' don't exist."
             exit 1
           fi
       - uses: actions/checkout@v4
@@ -36,10 +36,10 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           audience: 'sts.amazonaws.com'
-          aws-region: eu-central-1 #TODO: Always eu-central? Put in secrets? testen
+          aws-region: eu-central-1 #TODO: Always eu-central? Put in secrets?
           role-to-assume: arn:aws:iam::870615114862:role/github_actions_role #TODO: Dynamic Account ID? -> Secrets arn:aws:iam::XX$XXX{{ secrets.AWS_ACCOUNT_ID }}:role/github_actions_role
       - name: Terraform init
-        run: terraform init -no-color #-no-color to remove ASCI codes from Terraform output (don't work in github issues/comments)
+        run: terraform init -no-color
         working-directory: ${{ env.WORKING_DIR }}
       - name: Terraform validate
         run: terraform validate -no-color
@@ -55,7 +55,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
-            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
             #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
             <details><summary>Validation Output</summary>
 
@@ -64,6 +63,7 @@ jobs:
             \`\`\`
 
             </details>
+            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
 
             #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
 
@@ -75,12 +75,12 @@ jobs:
 
             </details>
 
-            #### Terraform Apply 📖\`${{ steps.apply.outcome }}\`
+            #### Terraform Destroy 📖\`${{ steps.destroy.outcome }}\`
 
-            <details><summary>Show Apply</summary>
+            <details><summary>Show Destroy</summary>
 
             \`\`\`\n
-            ${{ steps.apply.outputs.stdout }}
+            ${{ steps.destroy.outputs.stdout }}
             \`\`\`
             </details>
 
@@ -92,7 +92,13 @@ jobs:
               repo: context.repo.repo,
               body: output
             })
-      - name: Terraform apply
-        id: apply
-        run: terraform apply --auto-approve -no-color
+      - name: Terraform destroy
+        id: destroy
+        run: terraform destroy --auto-approve -no-color
         working-directory: ${{ env.WORKING_DIR }}
+
+
+
+
+    # apply:
+    # destroy:
