@@ -71,7 +71,7 @@ jobs:
             - name: Archive Terraform Plan Artifact
               uses: actions/upload-artifact@v4
               with:
-                name: terraform-plan-${{github.sha}}
+                name: terraform_plan_${{github.sha}}
                 path: ${{ env.WORKING_DIR }}/tfplan
 
             - name: Generate summary of Terraform Plan

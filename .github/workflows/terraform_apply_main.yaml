@@ -92,7 +92,7 @@ jobs:
         id: download-artifact
         uses: dawidd6/action-download-artifact@v6
         with:
-          name: terraform-plan-${{github.sha}}
+          name: terraform_plan_${{github.sha}}
           search_artifacts: true
           workflow: terraform_plan_main.yaml
           path: ${{env.WORKING_DIR}}
@@ -103,7 +103,7 @@ jobs:
         id: download-artifacts
         uses: dawidd6/action-download-artifact@v6
         with:
-          name: terraform-plan-${{github.sha}}
+          name: terraform_plan_${{github.sha}}
           search_artifacts: true
           workflow_search: true
           branch: main
@@ -111,5 +111,7 @@ jobs:
 
       - name: Terraform apply
         id: apply
-        run: terraform apply tfplan-${{github.sha}} --auto-approve -no-color
+
+        run: terraform apply tfplan_${{github.sha}} --auto-approve -no-color
+
         working-directory: ${{ env.WORKING_DIR }}
