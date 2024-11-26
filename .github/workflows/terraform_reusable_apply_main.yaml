@@ -8,4 +8,4 @@ on:
   workflow_dispatch: #TODO: Remove manual Plan || Add manual to create
 jobs:
     terraform_plan:
-        uses: GKK-Galeria/Workflows/.github/workflows/terraform_apply_main.yaml@main
+        uses: trc-aelshennawy/test/.github/workflows/terraform_apply_main.yaml@main #TODO: Change TO GKK-Galeria/Workflows
