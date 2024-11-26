@@ -111,5 +111,5 @@ jobs:
 
       - name: Terraform apply
         id: apply
-        run: terraform apply tfplan --auto-approve -no-color
+        run: terraform apply tfplan-${{github.sha}} --auto-approve -no-color
         working-directory: ${{ env.WORKING_DIR }}
