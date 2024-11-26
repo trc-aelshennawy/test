@@ -96,7 +96,18 @@ jobs:
         with:
           name: terraform-plan-${{github.sha}}
           search-artifacts: true
+          workflow-name: terraform_plan_main.yaml
+          path: ${{env.WORKING_DIR}}
 
+      - name: Download artifact
+        id: download-artifacts
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          name: terraform-plan-${{github.sha}}
+          search-artifacts: true
+          workflow-search: true
+          branch: main
+          path: ${{env.WORKING_DIR}}
 
       - name: Terraform apply
         id: apply
