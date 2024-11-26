@@ -29,7 +29,6 @@ jobs:
             echo "Error: Directories 'aws-envs's || 'aws_envs' don't exist."
             exit 1
           fi
-      - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
       - name: configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -96,7 +95,7 @@ jobs:
         uses: dawidd6/action-download-artifact@v6
         with:
           name: terraform-plan-${{github.sha}}
-          path: ${{env.WORKING_DIR}}
+          search-artifacts: true
 
 
       - name: Terraform apply
