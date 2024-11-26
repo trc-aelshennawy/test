@@ -106,6 +106,6 @@ jobs:
                   github.rest.issues.create({
                     owner: context.repo.owner,
                     repo: context.repo.repo,
-                    title: 'Terraform Plan Execution - CommitSha: ${{github.sha}}'
+                    title: 'Terraform Plan Execution - CommitSha: ${{github.sha}}',
                     body: output
                   });
