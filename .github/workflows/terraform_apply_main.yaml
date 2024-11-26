@@ -1,9 +1,9 @@
-name: 'Terraform Apply'
+name: 'Terraform Apply on Main Branch'
 permissions:
   id-token: write # Required to fetch the JWT OIDC Token
   contents: read # Actions/checkout
+  actions: read # Download Artifact from plan Workflow
   issues: write
-  pull-requests: write
 on:
   workflow_dispatch:
 
@@ -91,11 +91,14 @@ jobs:
               repo: context.repo.repo,
               body: output
             })
-      - name: Downlaod TF Plan Artifact
-        uses: actions/download-artifact@v4
+      - name: Download artifact
+        id: download-artifact
+        uses: dawidd6/action-download-artifact@v6
         with:
-          name: terraform-plan
+          name: terraform-plan-${{github.sha}}
           path: ${{env.WORKING_DIR}}
+
+
       - name: Terraform apply
         id: apply
         run: terraform apply tfplan --auto-approve -no-color

@@ -1,4 +1,4 @@
-name: 'Terraform Plan'
+name: 'Terraform Plan on Main Branch'
 permissions:
   id-token: write # Required to fetch the JWT OIDC Token
   contents: read # Actions/checkout
@@ -71,7 +71,7 @@ jobs:
             - name: Archive Terraform Plan Artifact
               uses: actions/upload-artifact@v4
               with:
-                name: terraform-plan
+                name: terraform-plan-${{github.sha}}
                 path: ${{ env.WORKING_DIR }}/tfplan
 
             - name: Generate summary of Terraform Plan
