@@ -83,24 +83,31 @@ jobs:
                 script: |
                  const output = `
                   #### Terraform Initialization ⚙️ \`${{ steps.init.outcome }}\`
+
                   #### Terraform Tfsec ⚙️ \`${{ steps.tfsec.outcome }}\`
+
                   <details><summary>Show Tfsec</summary>
                   \`\`\`
                   ${{ steps.tfsec.outputs.stdout }}
                   \`\`\`
                   </details>
+
                   #### Terraform Format and Validation 🤖 \`${{ steps.fmt_validate.outcome }}\`
                   <details><summary>Validation Output</summary>
                   \`\`\`
                   ${{ steps.fmt_validate.outputs.stdout }}
                   \`\`\`
                   </details>
+
                   #### Terraform Plan 📖 \`${{ steps.plan.outcome }}\`
+
                   <details><summary>Show Plan</summary>
                   \`\`\`
                   ${process.env.PLAN}
                   \`\`\`
                   </details>
+
+
                   *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.WORKING_DIR }}\`, Workflow: \`${{ github.workflow }}\`*`;
 
                   github.rest.issues.create({
