@@ -88,16 +88,6 @@ jobs:
               repo: context.repo.repo,
               body: output
             })
-      - name: Download artifact
-        id: download-artifact
-        uses: dawidd6/action-download-artifact@v6
-        with:
-          name: terraform_plan_${{github.sha}}
-          search_artifacts: true
-          workflow: terraform_plan_main.yaml
-          path: ${{env.WORKING_DIR}}
-          if_no_artifact_found: ignore
-
 
       - name: Download artifact
         id: download-artifacts
@@ -112,6 +102,6 @@ jobs:
       - name: Terraform apply
         id: apply
 
-        run: terraform apply terraform_plan_${{github.sha}} --auto-approve -no-color
+        run: terraform apply terraform_plan_${{github.sha}} -no-color
 
         working-directory: ${{ env.WORKING_DIR }}
