@@ -1,133 +1,133 @@
-name: 'Terraform Plan'
-permissions:
-  id-token: write # Required to fetch the JWT OIDC Token
-  contents: read # Actions/checkout
+# name: 'Terraform Plan'
+# permissions:
+#   id-token: write # Required to fetch the JWT OIDC Token
+#   contents: read # Actions/checkout
 
-  issues: write
+#   issues: write
 
-  pull-requests: write
-
-
-# Run Pipeline on push or merge requests on the main branch if environment in aws-envs was changed. Alternatively run manually in GitHub.
-on:
-  push:
-    branches: [ "main" ]
-    paths: ["aws-envs/**","aws_envs/**",".github/workflows/**"] # TODO: Remove after testing.Remove if all repoitories use the same name.
-  pull_request:
-    branches: [ "main" ]
-    paths: ["aws-envs/**","aws_envs/**"]
-  workflow_dispatch:
-
-defaults:
-  run:
-    shell: bash
-jobs:
-    terraform:
-          name: 'Terraform Plan'
-          runs-on: ubuntu-latest
-
-          steps:
-            - name: Check out repository
-              uses: actions/checkout@v4
-
-            - name: Set working directory
-              id: set_working_dir
-              run: |
-                if [ -d "aws-envs" ]; then
-                  echo "WORKING_DIR=aws-envs" >> $GITHUB_ENV
-                elif [ -d "aws_envs" ]; then
-                  echo "WORKING_DIR=aws_envs" >> $GITHUB_ENV
-                else
-                  echo "Error: Directories 'aws-envs's & 'aws_envs' don't exist."
-                  exit 1
-                fi
-
-            - name: Setup Terraform on GitHub Runner
-              uses: hashicorp/setup-terraform@v3
-
-            - name: Authenticate to AWS and assume role
-              uses: aws-actions/configure-aws-credentials@v4
-              with:
-                audience: 'sts.amazonaws.com'
-                aws-region: eu-central-1
-                role-to-assume: arn:aws:iam::870615114862:role/github_actions_role #TODO 628471438687 galeria gkk aws users
-
-            - name: Terraform init
-              id: init
-              run: terraform init
-              working-directory: ${{ env.WORKING_DIR }}
-
-            - name: Terraform fmt and validate
-              id: fmt_validate
-              run: |
-                (terraform validate -no-color || echo "::error::Terraform validation failed") &
-                (terraform fmt -check -no-color || echo "::error::Terraform fmt check failed") &
-                wait
-              working-directory: ${{ env.WORKING_DIR }}
-
-            - name: Tfsec
-              id: tfsec
-              uses: aquasecurity/tfsec-action@v1.0.3
-              with:
-                soft_fail: true # prevent action from breaking the build
-
-            - name: Terraform plan
-              id: plan
-              run: terraform plan -no-color
-              working-directory: ${{ env.WORKING_DIR }}
+#   pull-requests: write
 
 
-            - name: Generate summary for pull request
-              uses: actions/github-script@v7 # Comment on Pull Request
+# # Run Pipeline on push or merge requests on the main branch if environment in aws-envs was changed. Alternatively run manually in GitHub.
+# on:
+#   push:
+#     branches: [ "main" ]
+#     paths: ["aws-envs/**","aws_envs/**",".github/workflows/**"] # TODO: Remove after testing.Remove if all repoitories use the same name.
+#   pull_request:
+#     branches: [ "main" ]
+#     paths: ["aws-envs/**","aws_envs/**"]
+#   workflow_dispatch:
 
-              if: github.event_name == 'pull_request'
-              env:
-                PLAN: "terraform\n${{ steps.Plan.outputs.stdout }}"
-              with:
-                github-token: ${{ secrets.GITHUB_TOKEN }}
-                script: |
-                  const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
-                  #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-                  #### Terraform Tfsec ⚙️\`${{ steps.tfsec.outcome }}\`
+# defaults:
+#   run:
+#     shell: bash
+# jobs:
+#     terraform:
+#           name: 'Terraform Plan'
+#           runs-on: ubuntu-latest
+
+#           steps:
+#             - name: Check out repository
+#               uses: actions/checkout@v4
+
+#             - name: Set working directory
+#               id: set_working_dir
+#               run: |
+#                 if [ -d "aws-envs" ]; then
+#                   echo "WORKING_DIR=aws-envs" >> $GITHUB_ENV
+#                 elif [ -d "aws_envs" ]; then
+#                   echo "WORKING_DIR=aws_envs" >> $GITHUB_ENV
+#                 else
+#                   echo "Error: Directories 'aws-envs's & 'aws_envs' don't exist."
+#                   exit 1
+#                 fi
+
+#             - name: Setup Terraform on GitHub Runner
+#               uses: hashicorp/setup-terraform@v3
+
+#             - name: Authenticate to AWS and assume role
+#               uses: aws-actions/configure-aws-credentials@v4
+#               with:
+#                 audience: 'sts.amazonaws.com'
+#                 aws-region: eu-central-1
+#                 role-to-assume: arn:aws:iam::870615114862:role/github_actions_role #TODO 628471438687 galeria gkk aws users
+
+#             - name: Terraform init
+#               id: init
+#               run: terraform init
+#               working-directory: ${{ env.WORKING_DIR }}
+
+#             - name: Terraform fmt and validate
+#               id: fmt_validate
+#               run: |
+#                 (terraform validate -no-color || echo "::error::Terraform validation failed") &
+#                 (terraform fmt -check -no-color || echo "::error::Terraform fmt check failed") &
+#                 wait
+#               working-directory: ${{ env.WORKING_DIR }}
+
+#             - name: Tfsec
+#               id: tfsec
+#               uses: aquasecurity/tfsec-action@v1.0.3
+#               with:
+#                 soft_fail: true # prevent action from breaking the build
+
+#             - name: Terraform plan
+#               id: plan
+#               run: terraform plan -no-color
+#               working-directory: ${{ env.WORKING_DIR }}
 
 
-                  <details><summary>Show Tfsec</summary>
+#             - name: Generate summary for pull request
+#               uses: actions/github-script@v7 # Comment on Pull Request
 
-                  \`\`\`\n
-                  ${{ steps.tfsec.outputs.stdout }}
-                  \`\`\`
+#               if: github.event_name == 'pull_request'
+#               env:
+#                 PLAN: "terraform\n${{ steps.Plan.outputs.stdout }}"
+#               with:
+#                 github-token: ${{ secrets.GITHUB_TOKEN }}
+#                 script: |
+#                   const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+#                   #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+#                   #### Terraform Tfsec ⚙️\`${{ steps.tfsec.outcome }}\`
 
-                  </details>
 
-                  #### Terraform Validation 🤖\`${{ steps.fmt_validate.outcome }}\`
+#                   <details><summary>Show Tfsec</summary>
 
-                  <details><summary>Validation Output</summary>
+#                   \`\`\`\n
+#                   ${{ steps.tfsec.outputs.stdout }}
+#                   \`\`\`
 
-                  \`\`\`\n
-                  ${{ steps.fmt_validate.outputs.stdout }}
-                  \`\`\`
+#                   </details>
 
-                  </details>
+#                   #### Terraform Validation 🤖\`${{ steps.fmt_validate.outcome }}\`
 
-                  #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+#                   <details><summary>Validation Output</summary>
 
-                  <details><summary>Show Plan</summary>
+#                   \`\`\`\n
+#                   ${{ steps.fmt_validate.outputs.stdout }}
+#                   \`\`\`
 
-                  \`\`\`\n
-                  ${process.env.PLAN}
-                  \`\`\`
+#                   </details>
 
-                  </details>
+#                   #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
 
-                  *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.WORKING_DIR }}\`, Workflow: \`${{ github.workflow }}\`*`;
+#                   <details><summary>Show Plan</summary>
 
-                  github.rest.issues.createComment({
-                    issue_number: context.issue.number,
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    body: output
-                  })
-# TODO:
-  # 1. Modularize and Reuse Pipeline Components -> workflow_call -> one workflow for all repositories
-  # 2. Caching?
-  # 3. Eigener Runner?
+#                   \`\`\`\n
+#                   ${process.env.PLAN}
+#                   \`\`\`
+
+#                   </details>
+
+#                   *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.WORKING_DIR }}\`, Workflow: \`${{ github.workflow }}\`*`;
+
+#                   github.rest.issues.createComment({
+#                     issue_number: context.issue.number,
+#                     owner: context.repo.owner,
+#                     repo: context.repo.repo,
+#                     body: output
+#                   })
+# # TODO:
+#   # 1. Modularize and Reuse Pipeline Components -> workflow_call -> one workflow for all repositories
+#   # 2. Caching?
+#   # 3. Eigener Runner?
