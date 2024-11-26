@@ -42,9 +42,7 @@ jobs:
       - name: Terraform validate
         run: terraform validate -no-color
         working-directory: ${{ env.WORKING_DIR }}
-      - name: Terraform plan
-        run: terraform plan -no-color
-        working-directory: ${{ env.WORKING_DIR }}
+
       - uses: actions/github-script@v7 # Comment on Pull Request
         if: github.event_name == 'pull_request'
         env:
@@ -90,14 +88,6 @@ jobs:
               repo: context.repo.repo,
               body: output
             })
-      - name: Download artifact
-        id: download-artifact
-        uses: dawidd6/action-download-artifact@v6
-        with:
-          name: terraform-plan-${{github.sha}}
-          search-artifacts: true
-          workflow-name: terraform_plan_main.yaml
-          path: ${{env.WORKING_DIR}}
 
       - name: Download artifact
         id: download-artifacts
