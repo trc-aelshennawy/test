@@ -65,14 +65,14 @@ jobs:
 
             - name: Terraform plan
               id: plan
-              run: terraform plan -no-color -out=tfplan
+              run: terraform plan -no-color -out=terraform_plan_${{github.sha}}
               working-directory: ${{ env.WORKING_DIR }}
 
             - name: Archive Terraform Plan Artifact
               uses: actions/upload-artifact@v4
               with:
                 name: terraform_plan_${{github.sha}}
-                path: ${{ env.WORKING_DIR }}/tfplan
+                path: ${{ env.WORKING_DIR }}/terraform_plan_${{github.sha}}
 
             - name: Generate summary of Terraform Plan
               uses: actions/github-script@v7 # Comment on Pull Request
