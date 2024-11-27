@@ -1,4 +1,4 @@
-# name: 'Terraform Plan'
+# name: 'Terraform Plan on Feature Branch'
 # permissions:
 #   id-token: write # Required to fetch the JWT OIDC Token
 #   contents: read # Actions/checkout

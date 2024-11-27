@@ -4,8 +4,7 @@ permissions:
   contents: read # Actions/checkout
   issues: write
 on:
-  workflow_dispatch:
-
+  workflow_call:
 jobs:
   terraform_destroy:
     name: 'Terraform Destroy'
@@ -37,9 +36,42 @@ jobs:
           aws-region: eu-central-1 #TODO: Always eu-central? Put in secrets?
           role-to-assume: arn:aws:iam::870615114862:role/github_actions_role #TODO: Dynamic Account ID? -> Secrets arn:aws:iam::XX$XXX{{ secrets.AWS_ACCOUNT_ID }}:role/github_actions_role
       - name: Terraform init
+        id: init
         run: terraform init -no-color
         working-directory: ${{ env.WORKING_DIR }}
       - name: Terraform destroy
         id: destroy
         run: terraform destroy --auto-approve -no-color
         working-directory: ${{ env.WORKING_DIR }}
+
+      - name: Generate summary of Terraform Destroy
+        uses: actions/github-script@v7 # Comment on Pull Request
+        env:
+          DESTROY: "terraform\n${{ steps.destroy.outputs.stdout }}"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+           const output = `
+            #### Terraform Initialization ⚙️ \`${{ steps.init.outcome }}\`
+
+            #### Terraform Destroy 📖 \`${{ steps.destroy.outcome }}\`
+
+            <details><summary>Show Destroy Output</summary>
+
+            \`\`\`
+
+            ${process.env.DESTROY}
+
+            \`\`\`
+
+            </details>
+
+
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.WORKING_DIR }}\`, Workflow: \`${{ github.workflow }}\`*`;
+
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Terraform Destroy Execution - CommitSha: ${{github.sha}}',
+              body: output
+            });

@@ -1,0 +1,11 @@
+name: 'Terraform Apply on Main Branch'
+permissions:
+  id-token: write # Required to fetch the JWT OIDC Token
+  contents: read # Actions/checkout
+  issues: write # Write Issue with Plan and Terraform Plan Output
+# Run Pipeline on push or merge requests on the main branch if environment in aws-envs was changed. Alternatively run manually in GitHub.
+on:
+  workflow_dispatch: #TODO: Remove manual Plan || Add manual to create
+jobs:
+    terraform_plan:
+        uses: trc-aelshennawy/test/.github/workflows/terraform_destroy_main.yaml@main #TODO: Change TO GKK-Galeria/Workflows
