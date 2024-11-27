@@ -1,0 +1,77 @@
+name: 'Terraform Destroy on Main Branch'
+permissions:
+  id-token: write # Required to fetch the JWT OIDC Token
+  contents: read # Actions/checkout
+  issues: write
+on:
+  workflow_call:
+jobs:
+  terraform_destroy:
+    name: 'Terraform Destroy'
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: 'Set working directory'
+        id: set_working_dir
+        run: |
+          if [ -d "aws-envs" ]; then
+            echo "WORKING_DIR=aws-envs" >> $GITHUB_ENV
+          elif [ -d "aws_envs" ]; then
+            echo "WORKING_DIR=aws_envs" >> $GITHUB_ENV
+          else
+            echo "Error: Directories 'aws-envs's & 'aws_envs' don't exist."
+            exit 1
+          fi
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - name: configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          audience: 'sts.amazonaws.com'
+          aws-region: eu-central-1 #TODO: Always eu-central? Put in secrets?
+          role-to-assume: arn:aws:iam::870615114862:role/github_actions_role #TODO: Dynamic Account ID? -> Secrets arn:aws:iam::XX$XXX{{ secrets.AWS_ACCOUNT_ID }}:role/github_actions_role
+      - name: Terraform init
+        id: init
+        run: terraform init -no-color
+        working-directory: ${{ env.WORKING_DIR }}
+      - name: Terraform destroy
+        id: destroy
+        run: terraform destroy --auto-approve -no-color
+        working-directory: ${{ env.WORKING_DIR }}
+
+      - name: Generate summary of Terraform Destroy
+        uses: actions/github-script@v7 # Comment on Pull Request
+        env:
+          DESTROY: "terraform\n${{ steps.destroy.outputs.stdout }}"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+           const output = `
+            #### Terraform Initialization ⚙️ \`${{ steps.init.outcome }}\`
+
+            #### Terraform Destroy 📖 \`${{ steps.destroy.outcome }}\`
+
+            <details><summary>Show Destroy Output</summary>
+
+            \`\`\`
+
+            ${process.env.DESTROY}
+
+            \`\`\`
+
+            </details>
+
+
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.WORKING_DIR }}\`, Workflow: \`${{ github.workflow }}\`*`;
+
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Terraform Destroy Execution - CommitSha: ${{github.sha}}',
+              body: output
+            });

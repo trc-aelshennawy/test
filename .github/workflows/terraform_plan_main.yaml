@@ -1,28 +1,16 @@
-name: 'Terraform Plan'
+name: 'Terraform Plan on Main Branch'
 permissions:
   id-token: write # Required to fetch the JWT OIDC Token
   contents: read # Actions/checkout
-
   issues: write
-
-  pull-requests: write
-
-
 # Run Pipeline on push or merge requests on the main branch if environment in aws-envs was changed. Alternatively run manually in GitHub.
 on:
-  push:
-    branches: [ "main" ]
-    paths: ["aws-envs/**","aws_envs/**",".github/workflows/**"] # TODO: Remove after testing.Remove if all repoitories use the same name.
-  pull_request:
-    branches: [ "main" ]
-    paths: ["aws-envs/**","aws_envs/**"]
-  workflow_dispatch:
-
+  workflow_call:
 defaults:
   run:
     shell: bash
 jobs:
-    terraform:
+    terraform_plan:
           name: 'Terraform Plan'
           runs-on: ubuntu-latest
 
@@ -73,61 +61,63 @@ jobs:
 
             - name: Terraform plan
               id: plan
-              run: terraform plan -no-color
+              run: terraform plan -no-color -out=terraform_plan_${{github.sha}}
               working-directory: ${{ env.WORKING_DIR }}
 
+            - name: Archive Terraform Plan Artifact
+              uses: actions/upload-artifact@v4
+              with:
+                name: terraform_plan_${{github.sha}}
+                path: ${{ env.WORKING_DIR }}/terraform_plan_${{github.sha}}
 
-            - name: Generate summary for pull request
+            - name: Generate summary of Terraform Plan
               uses: actions/github-script@v7 # Comment on Pull Request
-
-              if: github.event_name == 'pull_request'
               env:
                 PLAN: "terraform\n${{ steps.Plan.outputs.stdout }}"
               with:
                 github-token: ${{ secrets.GITHUB_TOKEN }}
                 script: |
-                  const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
-                  #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-                  #### Terraform Tfsec ⚙️\`${{ steps.tfsec.outcome }}\`
+                 const output = `
+                  #### Terraform Initialization ⚙️ \`${{ steps.init.outcome }}\`
 
+                  #### Terraform Tfsec ⚙️ \`${{ steps.tfsec.outcome }}\`
 
                   <details><summary>Show Tfsec</summary>
 
-                  \`\`\`\n
+                  \`\`\`
                   ${{ steps.tfsec.outputs.stdout }}
                   \`\`\`
 
                   </details>
 
-                  #### Terraform Validation 🤖\`${{ steps.fmt_validate.outcome }}\`
+                  #### Terraform Format and Validation 🤖 \`${{ steps.fmt_validate.outcome }}\`
 
                   <details><summary>Validation Output</summary>
 
-                  \`\`\`\n
+                  \`\`\`
                   ${{ steps.fmt_validate.outputs.stdout }}
                   \`\`\`
 
                   </details>
 
-                  #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+                  #### Terraform Plan 📖 \`${{ steps.plan.outcome }}\`
 
                   <details><summary>Show Plan</summary>
 
-                  \`\`\`\n
+                  \`\`\`
+
                   ${process.env.PLAN}
+
                   \`\`\`
 
                   </details>
 
+
                   *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.WORKING_DIR }}\`, Workflow: \`${{ github.workflow }}\`*`;
 
-                  github.rest.issues.createComment({
-                    issue_number: context.issue.number,
+                  github.rest.issues.create({
                     owner: context.repo.owner,
                     repo: context.repo.repo,
+                    title: 'Terraform Plan Execution - CommitSha: ${{github.sha}}',
                     body: output
-                  })
-# TODO:
-  # 1. Modularize and Reuse Pipeline Components -> workflow_call -> one workflow for all repositories
-  # 2. Caching?
-  # 3. Eigener Runner?
+                  });
