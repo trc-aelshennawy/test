@@ -5,9 +5,9 @@ permissions:
   issues: write
 # Run Pipeline on push or merge requests on the main branch if environment in aws-envs was changed. Alternatively run manually in GitHub.
 on:
-  push:
-    branches: [ "main" ]
-    paths: ["aws-envs/**","aws_envs/**",".github/workflows/**"] # TODO: Remove after testing.Remove if all repoitories use the same name.
+  # push:
+  #   branches: [ "main" ]
+  #   paths: ["aws-envs/**","aws_envs/**",".github/workflows/**"] # TODO: Remove after testing.Remove if all repoitories use the same name.
   workflow_dispatch: #TODO: Remove manual Plan || Add manual to create
   workflow_call:
 defaults:
